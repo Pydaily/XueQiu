@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- Coding:utf-8 -*-
-
+from time import sleep
 from appium import webdriver
 import pytest
 from appium.webdriver.common.touch_action import TouchAction
@@ -21,6 +21,7 @@ class TestXueQiu:
     stock_change = (By.ID, "btn_change")  # 涨跌幅按钮
     stock_alibaba = (By.XPATH, "//*[contains(@resource-id,'portfolio_stockName') and @text='阿里巴巴']")  # 阿里巴巴股票
     stock_del = (By.XPATH, "//*[@text='删除']")  # 删除按钮
+    bmp_close = (By.ID, "closeBtn")  # BMP关闭按钮
 
     @pytest.fixture(scope="function", autouse=True)  # 如果scope设置为class，则需要return driver 并将base作为参数传入后续用例调用
     def base(self):
@@ -35,13 +36,12 @@ class TestXueQiu:
                                         'noReset': True
                                         })
         self.driver.implicitly_wait(6)
-        # 权限弹窗允许检测
-        self.find(*self.agree)
+        self.find(*self.agree)  # 权限提示检测
         self.find(*self.agree)
         yield
         self.driver.quit()
 
-    # 默认选择click方法，以便处理弹窗问题
+    # 封装控件查找方法，默认选择click方法，以便处理弹窗问题
     def find(self, *args, autoclick=True):
         try:
             if self.driver.find_element(*args):
@@ -60,6 +60,7 @@ class TestXueQiu:
         except:
             pass
 
+    # 封装页面加载检测方法
     def loaded(self, no_stock=True):
         locations = []
         while True:
@@ -72,6 +73,7 @@ class TestXueQiu:
                 if locations[-1] == locations[-2]:
                     break
 
+    # 封装搜索添加股票方法
     def search_add_stock(self, stockname):
         self.find(*self.cancel)  # 点击关闭更新按钮
         self.loaded()  # 检测首页是否加载完成
@@ -80,6 +82,7 @@ class TestXueQiu:
         self.find(*self.add_1st)  # 点击第一只股票的添加按钮
         self.find(*self.next_time)  # 处理可能出现的评价按钮
 
+    # 搜索并添加阿里巴巴股票
     def test_add_us(self):
         self.search_add_stock("阿里巴巴")  # 搜索阿里巴巴
         self.find(*self.stock_cancal)  # 点击搜索取消按钮
@@ -88,6 +91,7 @@ class TestXueQiu:
         self.find(*self.us_stock)  # 点击美股按钮
         assert self.find(*self.stock_alibaba, autoclick=False)
 
+    # 删除添加阿里巴巴股票
     def test_delete_us(self):
         self.find(*self.cancel)  # 点击关闭更新按钮
         self.loaded()  # 检测首页是否加载完成
@@ -100,6 +104,7 @@ class TestXueQiu:
             self.find(*self.stock_del)
         assert not self.find(*self.stock_alibaba, autoclick=False)
 
+    # 参数化添加三十只股票
     @pytest.mark.parametrize("stockname", [
         "百度", "阿里巴巴", "腾讯", "美团", "今日头条",
         "拼多多", "饿了么", "京东", "滴滴出行", "中国平安",
@@ -111,8 +116,29 @@ class TestXueQiu:
     def test_add_batch(self, stockname):
         self.search_add_stock(stockname)
 
+    # 检测美股中的股票是否在全部股票当中
     def test_exit_in_all(self):
-        pass
+        self.find(*self.cancel)  # 点击关闭更新按钮
+        self.loaded()  # 检测首页是否加载完成
+        self.find(*self.optional)  # 点击自选按钮
+        self.loaded(no_stock=False)  # 检测自选股是否加载完毕
+        self.find(*self.bmp_close)  # 点击BMP行情关闭按钮
+        all_stocks = []
+        for i in range(5):
+            stocks = self.driver.find_elements_by_id("portfolio_stockName")
+            for x in stocks:
+                all_stocks.append(x.text)
+            self.driver.swipe(550, 1540, 550, 500, duration=400)
+        all_stocks = list(set(all_stocks))  # 去掉重复元素
+
+        self.find(*self.us_stock)  # 点击美股按钮
+        self.loaded(no_stock=False)  # 检测自选股是否加载完毕
+        for j in range(3):
+            us_stocks = self.driver.find_elements_by_id("portfolio_stockName")
+            for y in us_stocks:
+                assert y.text in all_stocks
+            sleep(2)
+            self.driver.swipe(550, 1540, 550, 500, duration=400)
 
 
 if __name__ == "__main__":
