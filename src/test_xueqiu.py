@@ -116,29 +116,30 @@ class TestXueQiu:
     def test_add_batch(self, stockname):
         self.search_add_stock(stockname)
 
-    # 检测美股中的股票是否在全部股票当中
+    def get_stocks(self,times):
+        my_stocks = []
+        for i in range(times):
+            stocks = self.driver.find_elements_by_id("portfolio_stockName")
+            for x in stocks:
+                my_stocks.append(x.text)
+            self.driver.swipe(550, 1540, 550, 500, duration=400)
+        my_stocks = list(set(my_stocks))  # 去掉重复元素
+        return my_stocks
+
+    # 检测某个股票是否同时在全部股票以及美股中存在
     def test_exit_in_all(self):
         self.find(*self.cancel)  # 点击关闭更新按钮
         self.loaded()  # 检测首页是否加载完成
         self.find(*self.optional)  # 点击自选按钮
         self.loaded(no_stock=False)  # 检测自选股是否加载完毕
         self.find(*self.bmp_close)  # 点击BMP行情关闭按钮
-        all_stocks = []
-        for i in range(5):
-            stocks = self.driver.find_elements_by_id("portfolio_stockName")
-            for x in stocks:
-                all_stocks.append(x.text)
-            self.driver.swipe(550, 1540, 550, 500, duration=400)
-        all_stocks = list(set(all_stocks))  # 去掉重复元素
+        all_stocks = self.get_stocks(5)
 
         self.find(*self.us_stock)  # 点击美股按钮
-        self.loaded(no_stock=False)  # 检测自选股是否加载完毕
-        for j in range(3):
-            us_stocks = self.driver.find_elements_by_id("portfolio_stockName")
-            for y in us_stocks:
-                assert y.text in all_stocks
-            sleep(2)
-            self.driver.swipe(550, 1540, 550, 500, duration=400)
+        self.loaded(no_stock=False)  # 检测美股是否加载完毕
+        us_stocks = self.get_stocks(3)
+        mystock= "阿里巴巴"
+        assert mystock in all_stocks and mystock in us_stocks
 
 
 if __name__ == "__main__":
