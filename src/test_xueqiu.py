@@ -5,6 +5,10 @@ from appium import webdriver
 import pytest
 from appium.webdriver.common.touch_action import TouchAction
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+from XueQiu.driver import Appium
 
 
 class TestXueQiu:
@@ -25,21 +29,26 @@ class TestXueQiu:
 
     @pytest.fixture(scope="function", autouse=True)  # 如果scope设置为class，则需要return driver 并将base作为参数传入后续用例调用
     def base(self):
-        self.driver = webdriver.Remote("http://localhost:4723/wd/hub",
-                                       {"platformName": "android",
-                                        "deviceName": "demo",
-                                        "appPackage": "com.xueqiu.android",
-                                        "appActivity": ".view.WelcomeActivityAlias",
-                                        "unicodeKeyboard": True,
-                                        "resetKeyboard": True,
-                                        "autoGrantPermissions": True,
-                                        'noReset': True
-                                        })
+        Appium.initdriver()
+
         self.driver.implicitly_wait(6)
+        self.driver.find_element_by_id("image_cancel").click()
         self.find(*self.agree)  # 权限提示检测
         self.find(*self.agree)
         yield
         self.driver.quit()
+
+    #封装滑动方法
+    def swipe(self, by, director="up"):
+        x = self.driver.get_window_size()['width']
+        y = self.driver.get_window_size()['height']
+        if director == "up":
+            pass
+        elif director == "down":
+            pass
+        elif director == "left":
+            pass
+
 
     # 封装控件查找方法，默认选择click方法，以便处理弹窗问题
     def find(self, *args, autoclick=True):
@@ -116,6 +125,7 @@ class TestXueQiu:
     def test_add_batch(self, stockname):
         self.search_add_stock(stockname)
 
+    # 封装查询某项所有股票名方法
     def get_stocks(self,times):
         my_stocks = []
         for i in range(times):
@@ -140,6 +150,26 @@ class TestXueQiu:
         us_stocks = self.get_stocks(3)
         mystock= "阿里巴巴"
         assert mystock in all_stocks and mystock in us_stocks
+
+
+    def test_webview(self):
+        self.loaded()
+        self.driver.find_element_by_xpath("//*[@text='交易']").click()
+        self.driver.find_element_by_xpath("//*[@text='基金']").click()
+        WebDriverWait(self.driver, 20).until(EC.presence_of_element_located(By.XPATH, "//*[@text='已有蛋卷基金账户登录']"))
+        contexts = self.driver.contexts
+        print(contexts)
+        self.driver.switch_to.context(contexts[1])
+        self.driver.find_element_by_xpath("//#[@text='已有蛋卷基金账户登录']").click()
+        WebDriverWait(self.driver, 20).until(EC.presence_of_element_located(By.XPATH, "//*[@text='使用密码登录']"))
+        contexts = self.driver.contexts
+        print(contexts)
+        self.driver.switch_to.context(contexts[1])
+        self.driver.find_element_by_xpath("//#[@text='使用密码登录']").click()
+        self.driver.find_element_by_xpath("//#[@text='请输入手机号']").send_keys('13312345678')
+        self.driver.find_element_by_xpath("//#[@text='请输入密码']").send_keys('dsadsaf')
+        self.driver.find_element_by_xpath("//#[@text='安全登录']").click()
+
 
 
 if __name__ == "__main__":
