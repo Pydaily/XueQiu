@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- Coding:utf-8 -*-
-from XueQiu.driver import Appium
 from XueQiu.page.Search import Search
+
+from driver.BasePage import BaseView
 
 
 class Xueqiu(object):
     def tosearch(self):
-        Appium.getdriver().find_element_by_id("home_search").click()
+        BaseView.getdriver().find_element_by_id("home_search").click()
         return Search()

@@ -1,25 +1,37 @@
 #!/usr/bin/env python
 # -*- Coding:utf-8 -*-
-import time
-
 from appium import webdriver
-from appium.webdriver.webdriver import WebDriver
 
 
 class BaseView(object):
+    # def __init__(self):
+    #     caps = {"platformName": "android",
+    #             "deviceName": "demo",
+    #             "appPackage": "com.xueqiu.android",
+    #             "appActivity": ".view.WelcomeActivityAlias",
+    #             "unicodeKeyboard": True,
+    #             "resetKeyboard": True,
+    #             "autoGrantPermissions": True}
+    #     self.driver = webdriver.Remote("http://localhost:4723/wd/hub", caps)
+    #
+    # def get_driver(self):
+    #     return self.driver
     driver = None
-    ''':type driver: WebDriver'''
+    """type: webdriver"""
 
-    def initdriver(cls):
+    @classmethod
+    def getDriver(cls):
+        return cls.driver
+
+    @classmethod
+    def initDriver(cls):
         caps = {"platformName": "android",
                 "deviceName": "demo",
                 "appPackage": "com.xueqiu.android",
                 "appActivity": ".view.WelcomeActivityAlias",
                 "unicodeKeyboard": True,
                 "resetKeyboard": True,
+                "dontStopAppOnReset":True,
                 "autoGrantPermissions": True}
         cls.driver = webdriver.Remote("http://localhost:4723/wd/hub", caps)
-
-    def getdriver(cls):
-        return cls.driver
-
+        cls.driver.implicitly_wait(20)

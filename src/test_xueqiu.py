@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- Coding:utf-8 -*-
-from time import time
+import time
 from appium import webdriver
 import pytest
 from appium.webdriver.common.touch_action import TouchAction
@@ -9,9 +9,10 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from driver.BasePage import BaseView
+from utils.MyAppium import MyAppium
 
 
-class TestXueQiu(object):
+class TestXueQiu:
     agree = (By.XPATH, "//*[@text='允许']")  # 允许按钮
     optional = (By.XPATH, "//*[@text='自选' and contains(@resource-id,'tab_name')]")  # 自选按钮
     tv_search = (By.ID, "tv_search")  # 搜索框
@@ -29,15 +30,15 @@ class TestXueQiu(object):
 
     @pytest.fixture(scope="function", autouse=True)  # 如果scope设置为class，则需要return driver 并将base作为参数传入后续用例调用
     def base(self):
-        self.driver = BaseView.initdriver()
-        print(BaseView.initdriver())
+        BaseView.initDriver()
+        print(BaseView.driver)
         yield
-        self.driver.quit()
+        BaseView.getDriver().quit()
 
     #封装滑动方法
     def swipe(self, by, director="up"):
-        x = self.driver.get_window_size()['width']
-        y = self.driver.get_window_size()['height']
+        x = BaseView.getDriver().get_window_size()['width']
+        y = BaseView.getDriver().get_window_size()['height']
         if director == "up":
             pass
         elif director == "down":
@@ -45,33 +46,33 @@ class TestXueQiu(object):
         elif director == "left":
             pass
 
-    # 封装控件查找方法，默认选择click方法，以便处理弹窗问题
-    def find(self, *args, timeout=30):
-        end_time = time.time() + timeout
-        while True:
-            try:
-                return self.driver.find_element(*args)
-                break
-            except Exception as e:
-                print(e)
-                # 建立白名单，通过XPATH将随时可能出现的按钮处理掉
-                whitelist = ["//*[@text='允许']", "//*[@text='创建您的专属选股策略']",
-                             "//*[@text='下次再说']", "//*[contains(@resource-id,'iv_close')]",
-                             "//*[contains(@resource-id,'image_cancel')]"]
-                for key in whitelist:
-                    if self.driver.find_element(By.XPATH, key):
-                        self.driver.find_element(By.XPATH, key).click()
-            if time.time() > end_time:
-                break
+    # # 封装控件查找方法，默认选择click方法，以便处理弹窗问题
+    # def find(self, *args, timeout=30):
+    #     end_time = time.time() + timeout
+    #     while True:
+    #         try:
+    #             return BaseView.getDriver().find_element(*args)
+    #             break
+    #         except Exception as e:
+    #             print(e)
+    #             # 建立白名单，通过XPATH将随时可能出现的按钮处理掉
+    #             whitelist = ["//*[@text='允许']", "//*[@text='创建您的专属选股策略']",
+    #                          "//*[@text='下次再说']", "//*[contains(@resource-id,'iv_close')]",
+    #                          "//*[contains(@resource-id,'image_cancel')]"]
+    #             for key in whitelist:
+    #                 if BaseView.getDriver().find_element(By.XPATH, key):
+    #                     BaseView.getDriver().find_element(By.XPATH, key).click()
+    #         if time.time() > end_time:
+    #             break
 
     # 封装页面加载检测方法
     def loaded(self, no_stock=True):
         locations = []
         while True:
             if no_stock:
-                loc = self.find(*self.optional)  # 检测主页是否加载完毕
+                loc = MyAppium().myfind(*self.optional)  # 检测主页是否加载完毕
             else:
-                loc = self.find(*self.stock_change)  # 检测自选股是否加载完毕
+                loc = MyAppium().myfind(*self.stock_change)  # 检测自选股是否加载完毕
             locations.append(loc.location)
             if len(locations) >= 2:
                 if locations[-1] == locations[-2]:
@@ -79,34 +80,31 @@ class TestXueQiu(object):
 
     # 封装搜索添加股票方法
     def search_add_stock(self, stockname):
-        self.find(*self.cancel).click()  # 点击关闭更新按钮
         self.loaded()  # 检测首页是否加载完成
-        self.find(*self.tv_search).click()   # 点击搜索框
-        self.find(*self.search_input).send_keys(stockname)
-        self.find(*self.add_1st).click()   # 点击第一只股票的添加按钮
-        self.find(*self.next_time).click()   # 处理可能出现的评价按钮
+        MyAppium().myfind(*self.tv_search).click()   # 点击搜索框
+        MyAppium().myfind(*self.search_input).send_keys(stockname)
+        if MyAppium().myfind(*self.add_1st).is_displayed():
+            MyAppium().myfind(*self.add_1st).click()   # 点击第一只股票的添加按钮
 
     # 搜索并添加阿里巴巴股票
     def test_add_us(self):
         self.search_add_stock("阿里巴巴")  # 搜索阿里巴巴
-        self.find(*self.stock_cancal).click()   # 点击搜索取消按钮
-        self.find(*self.follow_cancel).click()   # 处理可能弹出的关注tips
-        self.find(*self.optional).click()   # 点击自选按钮
-        self.find(*self.us_stock).click()   # 点击美股按钮
-        assert self.find(*self.stock_alibaba)
+        MyAppium().myfind(*self.stock_cancal).click()   # 点击搜索取消按钮
+        MyAppium().myfind(*self.optional).click()   # 点击自选按钮
+        MyAppium().myfind(*self.us_stock).click()   # 点击美股按钮
+        assert MyAppium().myfind(*self.stock_alibaba).text == "阿里巴巴"
 
     # 删除添加阿里巴巴股票
     def test_delete_us(self):
-        self.find(*self.cancel)  # 点击关闭更新按钮
         self.loaded()  # 检测首页是否加载完成
-        self.find(*self.optional)  # 点击自选按钮
+        MyAppium().myfind(*self.optional).click()  # 点击自选按钮
         self.loaded(no_stock=False)  # 检测自选股是否加载完毕
-        self.find(*self.us_stock)  # 点击美股按钮
-        el = self.find(*self.stock_alibaba, autoclick=False)  # 查找自选中是否有阿里巴巴股票
-        if el:
-            TouchAction(self.driver).long_press(el).perform()
-            self.find(*self.stock_del)
-        assert not self.find(*self.stock_alibaba, autoclick=False)
+        MyAppium().myfind(*self.us_stock).click()  # 点击美股按钮
+        stock_name = MyAppium().myfind(*self.stock_alibaba)
+        if stock_name.is_displayed():  # 查找自选中是否有阿里巴巴股票
+            TouchAction(BaseView.getDriver()).long_press(stock_name).perform()
+            MyAppium().myfind(*self.stock_del)
+        assert not stock_name.is_displayed()
 
     # 参数化添加三十只股票
     @pytest.mark.parametrize("stockname", [
@@ -124,45 +122,53 @@ class TestXueQiu(object):
     def get_stocks(self, times):
         my_stocks = []
         for i in range(times):
-            stocks = self.driver.find_elements_by_id("portfolio_stockName")
+            stocks = BaseView.getDriver().find_elements_by_id("portfolio_stockName")
             for x in stocks:
                 my_stocks.append(x.text)
-            self.driver.swipe(550, 1540, 550, 500, duration=400)
+            BaseView.getDriver().swipe(550, 1540, 550, 500, duration=400)
         my_stocks = list(set(my_stocks))  # 去掉重复元素
         return my_stocks
 
     # 检测某个股票是否同时在全部股票以及美股中存在
     def test_exit_in_all(self):
-        self.find(*self.cancel)  # 点击关闭更新按钮
         self.loaded()  # 检测首页是否加载完成
-        self.find(*self.optional)  # 点击自选按钮
+        MyAppium().myfind(*self.optional).click()  # 点击自选按钮
         self.loaded(no_stock=False)  # 检测自选股是否加载完毕
-        self.find(*self.bmp_close)  # 点击BMP行情关闭按钮
+        MyAppium().myfind(*self.bmp_close).click()  # 点击BMP行情关闭按钮
         all_stocks = self.get_stocks(5)
-
-        self.find(*self.us_stock)  # 点击美股按钮
+        MyAppium().myfind(*self.us_stock).click()  # 点击美股按钮
         self.loaded(no_stock=False)  # 检测美股是否加载完毕
         us_stocks = self.get_stocks(3)
         mystock= "阿里巴巴"
         assert mystock in all_stocks and mystock in us_stocks
 
-    def test_webview(self):
-        self.loaded()
-        self.driver.find_element_by_xpath("//*[@text='交易']").click()
-        self.driver.find_element_by_xpath("//*[@text='基金']").click()
-        WebDriverWait(self.driver, 20).until(EC.presence_of_element_located(By.XPATH, "//*[@text='已有蛋卷基金账户登录']"))
-        contexts = self.driver.contexts
-        print(contexts)
-        self.driver.switch_to.context(contexts[1])
-        self.driver.find_element_by_xpath("//#[@text='已有蛋卷基金账户登录']").click()
-        WebDriverWait(self.driver, 20).until(EC.presence_of_element_located(By.XPATH, "//*[@text='使用密码登录']"))
-        contexts = self.driver.contexts
-        print(contexts)
-        self.driver.switch_to.context(contexts[1])
-        self.driver.find_element_by_xpath("//#[@text='使用密码登录']").click()
-        self.driver.find_element_by_xpath("//#[@text='请输入手机号']").send_keys('13312345678')
-        self.driver.find_element_by_xpath("//#[@text='请输入密码']").send_keys('dsadsaf')
-        self.driver.find_element_by_xpath("//#[@text='安全登录']").click()
+    # def test_webview(self):
+    #     self.loaded()
+    #     BaseView.getDriver().find_element_by_xpath("//*[@text='交易']").click()
+    #     BaseView.getDriver().find_element_by_xpath("//*[@text='基金']").click()
+    #     WebDriverWait(BaseView.getDriver(), 20).until(EC.presence_of_element_located(By.XPATH, "//*[@text='已有蛋卷基金账户登录']"))
+    #     contexts = BaseView.getDriver().contexts
+    #     print(contexts)
+    #     BaseView.getDriver().switch_to.context(contexts[1])
+    #     BaseView.getDriver().find_element_by_xpath("//#[@text='已有蛋卷基金账户登录']").click()
+    #     WebDriverWait(BaseView.getDriver(), 20).until(EC.presence_of_element_located(By.XPATH, "//*[@text='使用密码登录']"))
+    #     contexts = BaseView.getDriver().contexts
+    #     print(contexts)
+    #     BaseView.getDriver().switch_to.context(contexts[1])
+    #     BaseView.getDriver().find_element_by_xpath("//#[@text='使用密码登录']").click()
+    #     BaseView.getDriver().find_element_by_xpath("//#[@text='请输入手机号']").send_keys('13312345678')
+    #     BaseView.getDriver().find_element_by_xpath("//#[@text='请输入密码']").send_keys('dsadsaf')
+    #     BaseView.getDriver().find_element_by_xpath("//#[@text='安全登录']").click()
+
+    # def test_page_source(self):
+    #     self.loaded()
+    #     print(BaseView.getDriver().page_source)
+    #     test = ["//*[contains(@resource-id,'image_cancel')]",
+    #             "//*[@text='自选' and contains(@resource-id,'tab_name')]",
+    #             "tv_search","tab_name","//*[@text='美股']"]
+    #     for i in test:
+    #         print(i)
+    #         print(i in BaseView.getDriver().page_source)
 
 
 if __name__ == "__main__":
