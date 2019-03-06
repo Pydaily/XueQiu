@@ -34,4 +34,4 @@ class BaseView(object):
                 "dontStopAppOnReset":True,
                 "autoGrantPermissions": True}
         cls.driver = webdriver.Remote("http://localhost:4723/wd/hub", caps)
-        cls.driver.implicitly_wait(20)
+        cls.driver.implicitly_wait(8)
