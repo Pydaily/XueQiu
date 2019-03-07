@@ -31,7 +31,6 @@ class BaseView(object):
                 "appActivity": ".view.WelcomeActivityAlias",
                 "unicodeKeyboard": True,
                 "resetKeyboard": True,
-                "dontStopAppOnReset":True,
                 "autoGrantPermissions": True}
         cls.driver = webdriver.Remote("http://localhost:4723/wd/hub", caps)
-        cls.driver.implicitly_wait(8)
+        cls.driver.implicitly_wait(6)
