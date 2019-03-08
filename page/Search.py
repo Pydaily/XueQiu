@@ -26,7 +26,7 @@ class Search(object):
     def to_optional(self):
         MyAppium().my_find(*self.stock_cancal).click()
         MyAppium().my_find(*self.optional).click()
-        MyMethod().loaded(no_stock=False)
+        MyMethod().loaded(False)
         return self
 
     def getstocks(self):

@@ -19,11 +19,11 @@ class MyAppium(object):
         else:
             return False
 
-    def my_find(self, *args, timeout=30):
+    def my_find(self, by, locate, timeout=30):
         end_time = time.time() + timeout
         while True:
-            if self.myelement_exist(*args):
-                return BaseView.getDriver().find_element(*args)
+            if self.myelement_exist(by, locate):
+                return BaseView.getDriver().find_element(by, locate)
             elif time.time() > end_time:
                 print("查找超时，当前页面信息如下：", BaseView.getDriver().page_source)
                 break
@@ -40,7 +40,7 @@ class MyAppium(object):
                         BaseView.getDriver().find_element(By.XPATH, key).click()
                         break
 
-    def my_swipe(self, director="up", *args, list_by, list_value):
+    def my_swipe(self, list_by, list_value, director="up", *args):
             x = BaseView.getDriver().get_window_size()['width']  # 获取当前设备的宽度
             y = BaseView.getDriver().get_window_size()['height']  # 获取当前设备的高度
             if director == "up":  # X轴不变，Y轴从下往上

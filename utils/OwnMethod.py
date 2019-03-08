@@ -18,5 +18,4 @@ class MyMethod:
                 loc = MyAppium().my_find(*self.stock_change)  # 检测自选股是否加载完毕
             locations.append(loc.location)
             if len(locations) >= 2 and locations[-1] == locations[-2]:
-                print("页面加载完成")
                 break
