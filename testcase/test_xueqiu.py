@@ -8,11 +8,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from driver.BasePage import BaseView
-from page.HomePage import XueQiuHome
-from page.Search import Search
-from utils.MyAppium import MyAppium
-from utils.OwnMethod import MyMethod
+from driver.base_page import BaseView
+from page.home_page import XueQiuHome
+from page.search_page import Search
+from utils.my_appium import MyAppium
+from utils.my_method import MyMethod
 
 
 class TestXueQiu:
@@ -34,7 +34,6 @@ class TestXueQiu:
     @pytest.fixture(scope="function", autouse=True)  # 如果scope设置为class，则需要return driver 并将base作为参数传入后续用例调用
     def base(self):
         BaseView.initDriver()
-        print(BaseView.driver)
         yield
         BaseView.getDriver().quit()
 
@@ -54,7 +53,7 @@ class TestXueQiu:
         search = home_page.to_search()
         search.search(stockname)
         search.search_add()
-        search.to_optional()
+        search.to_portfoli()
         assert stockname in BaseView.getDriver().page_source
 
 
@@ -119,20 +118,11 @@ class TestXueQiu:
         contexts = BaseView.getDriver().contexts
         print(contexts)
         BaseView.getDriver().switch_to.context(contexts[1])
-        BaseView.getDriver().find_element_by_xpath("//#[@text='使用密码登录']").click()
-        BaseView.getDriver().find_element_by_xpath("//#[@text='请输入手机号']").send_keys('13312345678')
-        BaseView.getDriver().find_element_by_xpath("//#[@text='请输入密码']").send_keys('dsadsaf')
-        BaseView.getDriver().find_element_by_xpath("//#[@text='安全登录']").click()
+        BaseView.getDriver().find_element_by_xpath("//*[@text='使用密码登录']").click()
+        BaseView.getDriver().find_element_by_xpath("//*[@text='请输入手机号']").send_keys('13312345678')
+        BaseView.getDriver().find_element_by_xpath("//*[@text='请输入密码']").send_keys('dsadsaf')
+        BaseView.getDriver().find_element_by_xpath("//*[@text='安全登录']").click()
 
-    # def test_page_source(self):
-    #     MyMethod().loaded()
-    #     print(BaseView.getDriver().page_source)
-    #     test = ["//*[contains(@resource-id,'image_cancel')]",
-    #             "//*[@text='自选' and contains(@resource-id,'tab_name')]",
-    #             "tv_search","tab_name","//*[@text='美股']"]
-    #     for i in test:
-    #         print(i)
-    #         print(i in BaseView.getDriver().page_source)
 
 
 if __name__ == "__main__":

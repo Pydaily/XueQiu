@@ -3,9 +3,11 @@
 import re
 
 import time
+
+from appium.webdriver import WebElement
 from selenium.webdriver.common.by import By
 
-from driver.BasePage import BaseView
+from driver.base_page import BaseView
 
 
 class MyAppium(object):
@@ -19,12 +21,12 @@ class MyAppium(object):
         else:
             return False
 
-    def my_find(self, by, locate, timeout=30):
-        end_time = time.time() + timeout
+    def my_find(self, by, locate, timeout=30) -> WebElement:
+        _end_time = time.time() + timeout
         while True:
             if self.myelement_exist(by, locate):
                 return BaseView.getDriver().find_element(by, locate)
-            elif time.time() > end_time:
+            elif time.time() > _end_time:
                 print("查找超时，当前页面信息如下：", BaseView.getDriver().page_source)
                 break
             else:
@@ -82,6 +84,7 @@ class MyAppium(object):
                             new_elements.append(x.text)
                         if new_elements[:-1] == all_elements[:-1]:  # 当前最后元素与之前最后一个元素对比
                             print("滑动已到底")
+                            return all_elements
                             break
                         else:
                             all_elements += new_elements
