@@ -2,11 +2,11 @@
 # -*- Coding:utf-8 -*-
 from selenium.webdriver.common.by import By
 
+from page.base_page import BasePage
 from page.portfolio_page import Portfolio
-from utils.my_appium import MyAppium
 
 
-class StockManage(MyAppium):
+class StockManage(BasePage):
     _group_manage = (By.XPATH, "//*[@text='管理分组']")
     _group_add = (By.ID, "add_item")
     _group_input = (By.ID, "dialog_input_text")
@@ -19,14 +19,14 @@ class StockManage(MyAppium):
         self.my_find(*self._group_manage).click()
         return self
 
-
     def add_group(self, group_name):
         self.my_find(*self._group_add).click()
         self.my_find(*self._group_input).send_keys(group_name)
         self.my_find(*self._group_submit).click()
         return self
 
-    def detele_group(self, group_name):
+    def delete_group(self, group_name):
+        # //*[@text='test']/preceding-sibling::*
         self.my_find(*self._group_list).my_find(By.XPATH, "//*[@text='" + group_name + "']").my_find()
 
     def get_group_name(self):

@@ -8,5 +8,5 @@ class Stock(Portfolio):
     def get_by_us(self):
         pass
 
-    def get_name_by_group(self,name):
+    def get_name_by_group(self, name):
         pass

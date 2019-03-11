@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- Coding:utf-8 -*-
 from appium import webdriver
+from appium.webdriver import WebElement
 
 
 class BaseView(object):
@@ -16,15 +17,14 @@ class BaseView(object):
     #
     # def get_driver(self):
     #     return self.driver
-    driver = None
-    """type: webdriver"""
+    driver = None  # type: webdriver
 
     @classmethod
-    def getDriver(cls):
+    def get_driver(cls) -> WebElement:
         return cls.driver
 
     @classmethod
-    def initDriver(cls):
+    def init_driver(cls):
         caps = {"platformName": "android",
                 "deviceName": "demo",
                 "appPackage": "com.xueqiu.android",

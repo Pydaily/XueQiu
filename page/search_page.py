@@ -2,8 +2,8 @@
 # -*- Coding:utf-8 -*-
 from selenium.webdriver.common.by import By
 
-from driver.base_page import BaseView
-from utils.my_appium import MyAppium
+from driver.base_driver import BaseView
+from page.base_page import BasePage
 from utils.my_method import MyMethod
 
 
@@ -14,18 +14,18 @@ class Search(object):
     _optional = (By.XPATH, "//*[@text='自选' and contains(@resource-id,'tab_name')]")  # 自选按钮
 
     def search(self, keyword):
-        MyAppium().my_find(*self._search_input).send_keys(keyword)
+        BasePage().my_find(*self._search_input).send_keys(keyword)
         return self
 
     def search_add(self):
-        stock_added = MyAppium().myelement_exist(*self._add_1st)  # 检测股票是否已添加
+        stock_added = BasePage().myelement_exist(*self._add_1st)  # 检测股票是否已添加
         if stock_added:
-            MyAppium().my_find(*self._add_1st).click()
+            BasePage().my_find(*self._add_1st).click()
         return self
 
     def to_portfoli(self):
-        MyAppium().my_find(*self._stock_cancel).click()
-        MyAppium().my_find(*self._optional).click()
+        BasePage().my_find(*self._stock_cancel).click()
+        BasePage().my_find(*self._optional).click()
         MyMethod().loaded(False)
         return self
 
