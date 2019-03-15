@@ -14,10 +14,10 @@ class XueQiuHome(BasePage):
 
     def to_search(self):
         MyMethod().loaded()  # 检测首页是否加载完成
-        self.my_find(*self.tv_search).click()
+        self.find(*self.tv_search).click()
         return Search()
 
     def to_portfolio(self):
         MyMethod().loaded()
-        self.my_find(*self.portfolio).click()
+        self.find(*self.portfolio).click()
         return Portfolio()

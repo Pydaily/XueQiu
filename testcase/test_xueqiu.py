@@ -7,7 +7,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from driver.base_driver import BaseView
-from page.home_page import XueQiuHome
 from page.base_page import BasePage
 from utils.my_method import MyMethod
 
@@ -28,42 +27,17 @@ class TestXueQiu:
     stock_del = (By.XPATH, "//*[@text='删除']")  # 删除按钮
     bmp_close = (By.ID, "closeBtn")  # BMP关闭按钮
 
-    @pytest.fixture(scope="function", autouse=True)  # 如果scope设置为class，则需要return driver 并将base作为参数传入后续用例调用
-    def base(self):
-        BaseView.init_driver()
-        yield
-        BaseView.get_driver().quit()
-
-    # 封装搜索添加股票方法
-    def search_add_stock(self, stockname):
-        home_page = XueQiuHome()
-        search = home_page.to_search()
-        search.search(stockname)
-        search.search_add()
-
-    @pytest.mark.parametrize("stockname", [
-        "百度", "阿里巴巴", "腾讯"
-    ])
-    # 搜索并添加股票
-    def test_add_us(self, stockname):
-        home_page = XueQiuHome()
-        search = home_page.to_search()
-        search.search(stockname)
-        search.search_add()
-        search.to_portfoli()
-        assert stockname in BaseView.get_driver().page_source
-
 
     # 删除添加阿里巴巴股票
     def test_delete_us(self):
         MyMethod().loaded()  # 检测首页是否加载完成
-        BasePage().my_find(*self.optional).click()  # 点击自选按钮
-        BasePage().my_find(*self.us_stock).click()  # 点击美股按钮
-        stock_name = BasePage().myelement_exist(*self.stock_alibaba)
+        BasePage().find(*self.optional).click()  # 点击自选按钮
+        BasePage().find(*self.us_stock).click()  # 点击美股按钮
+        stock_name = BasePage().element_exist(*self.stock_alibaba)
         if stock_name:  # 查找自选中是否有阿里巴巴股票
-            sn = BasePage().my_find(*self.stock_alibaba)
+            sn = BasePage().find(*self.stock_alibaba)
             TouchAction(BaseView.get_driver()).long_press(sn).perform()
-            BasePage().my_find(*self.stock_del).click()
+            BasePage().find(*self.stock_del).click()
         assert stock_name != True
 
     # 参数化添加三十只股票
@@ -92,11 +66,11 @@ class TestXueQiu:
     # 检测某个股票是否同时在全部股票以及美股中存在
     def test_exit_in_all(self):
         MyMethod().loaded()  # 检测首页是否加载完成
-        BasePage().my_find(*self.optional).click()  # 点击自选按钮
+        BasePage().find(*self.optional).click()  # 点击自选按钮
         MyMethod().loaded(no_stock=False)  # 检测自选股是否加载完毕
-        BasePage().my_find(*self.bmp_close).click()  # 点击BMP行情关闭按钮
+        BasePage().find(*self.bmp_close).click()  # 点击BMP行情关闭按钮
         all_stocks = self.get_stocks(5)
-        BasePage().my_find(*self.us_stock).click()  # 点击美股按钮
+        BasePage().find(*self.us_stock).click()  # 点击美股按钮
         MyMethod().loaded(no_stock=False)  # 检测美股是否加载完毕
         us_stocks = self.get_stocks(3)
         mystock= "阿里巴巴"
